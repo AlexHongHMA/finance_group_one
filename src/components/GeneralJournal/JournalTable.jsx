@@ -16,7 +16,7 @@ import { Button } from "../ui/button";
 import moment from "moment";
 import MakeTable from "../MakeTable";
 
-export default function JournalTable({ oriData }) {
+export default function JournalTable({ oriData = [] }) {
   const loading = { show: true, error: "" };
 
   const [searchData, setSearchData] = useState({});
