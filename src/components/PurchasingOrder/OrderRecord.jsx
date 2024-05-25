@@ -187,9 +187,24 @@ export default function OrderRecord({ oriData }) {
     setFilterInput(value);
   };
 
+  async function fetchData() {
+    const res = await fetch(`${process.env.APP_URL}/api/purchasing-order/`);
+
+    if (!res.ok) {
+      console.log("Failed to fetch data");
+    }
+
+    const ran = await res.json();
+
+    console.log(ran, process.env.APP_URL);
+  }
+
   return (
     <>
       <div className="mb-8 flex smmx:flex-col justify-between items-end smmx:items-start smmx:space-y-5">
+        <button type="button" onClick={fetchData}>
+          Fetch
+        </button>
         <div>
           <form
             noValidate
