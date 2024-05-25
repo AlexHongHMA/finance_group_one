@@ -2,6 +2,9 @@ import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import OrderRecord from "@/components/PurchasingOrder/OrderRecord";
 import React from "react";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 async function getData() {
   const res = await fetch(`${process.env.APP_URL}/api/purchasing-order/`);
 
