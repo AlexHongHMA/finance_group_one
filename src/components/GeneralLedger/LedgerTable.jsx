@@ -1,7 +1,6 @@
-/* eslint-disable */
 "use client";
 
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import React, { useCallback, useMemo, useState, useRef } from "react";
 
 import {
   useTable,
@@ -10,18 +9,25 @@ import {
   useSortBy,
   useGlobalFilter,
 } from "react-table";
-
+import MakeTable from "../MakeTable";
+import moment from "moment";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import moment from "moment";
-import MakeTable from "../MakeTable";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
-export default function JournalTable({ oriData }) {
+function LedgerTable({ oriData }) {
   const loading = { show: true, error: "" };
-
-  const [searchData, setSearchData] = useState({});
+  const [filters] = useState(["RefNo"]);
   const [filterInput, setFilterInput] = useState("");
   const searchInputRef = useRef(null);
+  const [dropdownFilter, setDropdownFilter] = useState("All");
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -32,35 +38,17 @@ export default function JournalTable({ oriData }) {
     []
   );
 
-  const [filters] = useState(["Ref_No"]);
-
   const data = useMemo(() => oriData, [oriData]);
 
   const CellDate = (tableProps) => {
     const component = useMemo(
-      () => moment(tableProps.row.original.date).format("DD MMM YYYY"),
-      [tableProps]
-    );
-
-    return component;
-  };
-
-  const CellTitle = (tableProps) => {
-    const component = useMemo(
-      () => <p>{tableProps.row.original.Account_Title_and_explanation}</p>,
-      [tableProps]
-    );
-
-    return component;
-  };
-
-  const CellDebit = (tableProps, title) => {
-    const component = useMemo(
       () => (
         <p>
-          {title === "debit"
-            ? tableProps.row.original.Debit.toLocaleString()
-            : tableProps.row.original.Credit.toLocaleString()}
+          {tableProps.row.original.Date ? (
+            moment(tableProps.row.original.Date).format("DD MMM YYYY")
+          ) : (
+            <span>-</span>
+          )}
         </p>
       ),
       [tableProps]
@@ -69,41 +57,53 @@ export default function JournalTable({ oriData }) {
     return component;
   };
 
+  const CellAmount = (rawData) => {
+    const component = useMemo(
+      () => <p>{rawData ? rawData.toLocaleString() : "-"}</p>,
+      [rawData]
+    );
+
+    return component;
+  };
+
   const COLUMNS = [
     {
       Header: "Date",
-      accessor: "date",
-      width: 94,
-      maxWidth: 94,
+      accessor: "Date",
+      width: 164,
+      maxWidth: 164,
+      style: { whiteSpace: "unset" },
       Cell: (tableProps) => CellDate(tableProps),
     },
     {
-      Header: "Account Title and explanation",
-      accessor: "Account_Title_and_explanation",
+      Header: "Ref Number",
+      accessor: "RefNo",
       width: 164,
       maxWidth: 164,
-      Cell: (tableProps) => CellTitle(tableProps),
       style: { whiteSpace: "unset" },
     },
     {
-      Header: "Ref No",
-      accessor: "Ref_No",
-      width: 104,
-      maxWidth: 104,
-    },
-    {
-      Header: "Debit",
-      accessor: "Debit",
-      width: 104,
-      maxWidth: 104,
-      Cell: (tableProps) => CellDebit(tableProps, "debit"),
+      Header: "Account Type",
+      accessor: "Type",
+      width: 164,
+      maxWidth: 164,
+      style: { whiteSpace: "unset" },
     },
     {
       Header: "Credit",
       accessor: "Credit",
-      width: 104,
-      maxWidth: 104,
-      Cell: (tableProps) => CellDebit(tableProps, "credit"),
+      width: 164,
+      maxWidth: 164,
+      style: { whiteSpace: "unset" },
+      Cell: (tableProps) => CellAmount(tableProps.row.original.Credit),
+    },
+    {
+      Header: "Debit",
+      accessor: "Debit",
+      width: 164,
+      maxWidth: 164,
+      style: { whiteSpace: "unset" },
+      Cell: (tableProps) => CellAmount(tableProps.row.original.Debit),
     },
   ];
   const columns = useMemo(() => COLUMNS, []);
@@ -113,12 +113,7 @@ export default function JournalTable({ oriData }) {
       rows.filter((row) =>
         filters.find((columnName) => {
           if (
-            (columnName === "phone_number"
-              ? row.values[columnName].replace(/\s/gi, "")
-              : row.values[columnName]
-            )
-              .toLowerCase()
-              .includes(query.toLowerCase())
+            row.values[columnName]?.toLowerCase().includes(query.toLowerCase())
           ) {
             return row;
           }
@@ -142,6 +137,8 @@ export default function JournalTable({ oriData }) {
     pageCount,
     gotoPage,
     nextPage,
+    setFilter,
+    preGlobalFilteredRows,
     previousPage,
     setPageSize,
     setGlobalFilter,
@@ -195,17 +192,37 @@ export default function JournalTable({ oriData }) {
 
     setFilterInput(value);
   }
-
   const handleFilterChange = (e) => {
     const value = e.target.value || "";
 
     if (value === "") {
       setGlobalFilter(value);
-      setSearchData([]);
     }
 
     setFilterInput(value);
   };
+
+  const dropdownOptions = useMemo(() => {
+    const options = new Set();
+    preGlobalFilteredRows.forEach((row) => {
+      options.add(row.values.Type);
+    });
+    const mySet = new Set(
+      Array.from(options).filter((value) => value !== null)
+    );
+
+    return ["All", ...mySet.values()];
+  }, [preGlobalFilteredRows]);
+
+  const handleFilterDropdown = useCallback((value) => {
+    if (value === "All") {
+      setFilter("Type", undefined);
+      setDropdownFilter("All");
+    } else {
+      setFilter("Type", value || undefined);
+      setDropdownFilter(value);
+    }
+  }, []);
 
   return (
     <>
@@ -240,8 +257,27 @@ export default function JournalTable({ oriData }) {
             </Button>
           </form>
         </div>
+        <div>
+          <p className="p3 font-bold mb-1">Account Type</p>
+          <Select value={dropdownFilter} onValueChange={handleFilterDropdown}>
+            <SelectTrigger className="w-[180px] smmx:w-[200px]">
+              <SelectValue placeholder="Select a fruit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {dropdownOptions.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item.toUpperCase()}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <MakeTable loading={loading} propsToTable={propsToTable} />
     </>
   );
 }
+
+export default LedgerTable;

@@ -1,9 +1,9 @@
-import JournalTable from "@/components/GeneralJournal/JournalTable";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import SaleInvoiceTable from "@/components/SaleInvoice/SaleInvoiceTable";
 import React from "react";
 
 async function getData() {
-  const res = await fetch(`${process.env.APP_URL}/api/general-journal/`, {
+  const res = await fetch(`${process.env.APP_URL}/api/sale-invoice/`, {
     cache: "force-cache",
   });
 
@@ -14,13 +14,13 @@ async function getData() {
   return res.json();
 }
 
-const GeneralJournal = async () => {
+const SaleInvoice = async () => {
   const stockData = await getData();
   return (
     <MaxWidthWrapper>
-      <JournalTable oriData={stockData?.data?.recordset || []} />
+      <SaleInvoiceTable oriData={stockData?.data?.recordset || []} />
     </MaxWidthWrapper>
   );
 };
 
-export default GeneralJournal;
+export default SaleInvoice;

@@ -1,9 +1,9 @@
-import JournalTable from "@/components/GeneralJournal/JournalTable";
+import LedgerTable from "@/components/GeneralLedger/LedgerTable";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import React from "react";
 
 async function getData() {
-  const res = await fetch(`${process.env.APP_URL}/api/general-journal/`, {
+  const res = await fetch(`${process.env.APP_URL}/api/test/`, {
     cache: "force-cache",
   });
 
@@ -14,13 +14,13 @@ async function getData() {
   return res.json();
 }
 
-const GeneralJournal = async () => {
+const GeneralLeger = async () => {
   const stockData = await getData();
   return (
     <MaxWidthWrapper>
-      <JournalTable oriData={stockData?.data?.recordset || []} />
+      <LedgerTable oriData={stockData?.data?.recordset || []} />
     </MaxWidthWrapper>
   );
 };
 
-export default GeneralJournal;
+export default GeneralLeger;

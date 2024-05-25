@@ -1,13 +1,7 @@
 /* eslint-disable */
 "use client";
 
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 
 import {
   useTable,
@@ -17,56 +11,27 @@ import {
   useGlobalFilter,
 } from "react-table";
 
-import MakeSSRTable from "../MakeSSRTable";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import MakeTable from "../MakeTable";
 
-export default function OrderRecord() {
-  const [isSearching, setIsSearching] = useState(false);
-  const [oriData, setOriData] = useState({});
-  const [searchData, setSearchData] = useState({});
+export default function OrderRecord({ oriData }) {
   const [filterInput, setFilterInput] = useState("");
   const searchInputRef = useRef(null);
+  const defaultColumn = React.useMemo(
+    () => ({
+      minWidth: 20,
+      width: 140,
+      maxWidth: 500,
+    }),
+    []
+  );
 
   const [filters] = useState(["Customer_ID"]);
 
-  const [paginationIndex, setPaginationIndex] = useState(1);
+  const loading = { show: true, error: "" };
 
-  async function getOrderData() {
-    setIsSearching(true);
-    const res = await fetch(
-      `${process.env.APP_URL}/api/purchasing-order?page=${paginationIndex}&limit=10`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-    if (!res.ok) {
-      console.log("Failed to fetch data");
-    }
-    const orders = await res.json();
-    setOriData(orders?.data);
-    setIsSearching(false);
-  }
-
-  useEffect(() => {
-    getOrderData();
-  }, [paginationIndex]);
-
-  // console.log(queryParams);
-
-  const dataStatus = {
-    show: oriData?.data || false,
-    error: false,
-  };
-
-  const tableData = useMemo(
-    () => oriData?.data?.recordset || [],
-    [oriData?.data?.recordset]
-  );
+  const tableData = useMemo(() => oriData, [oriData]);
 
   const columns = useMemo(
     () => [
@@ -151,6 +116,7 @@ export default function OrderRecord() {
     headerGroups,
     prepareRow,
     page,
+    rows,
     canPreviousPage,
     canNextPage,
     pageOptions,
@@ -159,33 +125,23 @@ export default function OrderRecord() {
     nextPage,
     previousPage,
     setPageSize,
-    setFilter,
     setGlobalFilter,
-
-    state: { pageIndex, pageSize },
+    state: { pageIndex },
   } = useTable(
     {
       columns,
-      data:
-        searchData?.data?.recordset.length > 0
-          ? searchData?.data?.recordset
-          : tableData,
+      data: tableData,
+      defaultColumn,
       globalFilter: ourGlobalFilterFunction,
-
       initialState: {
-        pageIndex: paginationIndex - 1,
         sortBy: [
           {
-            id: "last_transation_date",
+            id: "date",
             desc: true,
           },
         ],
-        pageSize: 10,
+        pageSize: 20,
       },
-      manualPagination: Object.keys(searchData).length === 0, // Tell the usePagination
-      pageCount: searchData?.total_pages
-        ? searchData?.total_pages
-        : oriData?.total_pages,
     },
     useGlobalFilter,
     useFilters,
@@ -199,6 +155,7 @@ export default function OrderRecord() {
     getTableBodyProps,
     prepareRow,
     page,
+    rows,
     canPreviousPage,
     canNextPage,
     pageOptions,
@@ -208,34 +165,14 @@ export default function OrderRecord() {
     previousPage,
     setPageSize,
     pageIndex,
-    pageSize,
-    pageCount: searchData?.total_pages
-      ? searchData?.total_pages
-      : oriData?.total_pages,
   };
 
-  async function handleOnSubmitInput(e) {
+  function handleOnSubmitInput(e) {
     e.preventDefault();
 
     const value = searchInputRef.current.value || "";
 
-    setIsSearching(true);
-    const res = await fetch(`${process.env.APP_URL}/api/purchasing-order/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: JSON.stringify({ search: value }),
-    });
-
-    if (!res.ok) {
-      console.log("Failed to fetch data");
-    }
-    const orders = await res.json();
-    setSearchData(orders?.data);
-
-    setIsSearching(false);
+    setGlobalFilter(value);
 
     setFilterInput(value);
   }
@@ -245,7 +182,6 @@ export default function OrderRecord() {
 
     if (value === "") {
       setGlobalFilter(value);
-      setSearchData([]);
     }
 
     setFilterInput(value);
@@ -285,18 +221,7 @@ export default function OrderRecord() {
           </form>
         </div>
       </div>
-      {!isSearching && searchData?.data?.recordset?.length === 0 ? (
-        <div>There is no result for this.</div>
-      ) : (
-        <MakeSSRTable
-          loading={dataStatus}
-          propsToTable={propsToTable}
-          setPaginationIndex={setPaginationIndex}
-          isSearching={isSearching}
-          searchData={Object.keys(searchData).length === 0}
-          // FilterDate={Filter}
-        />
-      )}
+      <MakeTable loading={loading} propsToTable={propsToTable} />
     </>
   );
 }

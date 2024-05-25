@@ -13,15 +13,13 @@ import {
 
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import moment from "moment";
 import MakeTable from "../MakeTable";
 
-export default function JournalTable({ oriData }) {
-  const loading = { show: true, error: "" };
-
-  const [searchData, setSearchData] = useState({});
+export default function SaleInvoiceTable({ oriData }) {
   const [filterInput, setFilterInput] = useState("");
   const searchInputRef = useRef(null);
+
+  const [filters] = useState(["Customer_ID"]);
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -32,81 +30,66 @@ export default function JournalTable({ oriData }) {
     []
   );
 
-  const [filters] = useState(["Ref_No"]);
+  const loading = { show: true, error: "" };
 
-  const data = useMemo(() => oriData, [oriData]);
+  const tableData = useMemo(() => oriData, [oriData]);
 
-  const CellDate = (tableProps) => {
-    const component = useMemo(
-      () => moment(tableProps.row.original.date).format("DD MMM YYYY"),
-      [tableProps]
-    );
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Customer Id",
+        accessor: "Customer_ID",
+        width: 117,
+        maxWidth: 117,
+        style: { whiteSpace: "unset" },
+      },
 
-    return component;
-  };
+      {
+        Header: "Company",
+        accessor: "COMPANY",
+        width: 140,
+        maxWidth: 140,
+        style: { whiteSpace: "unset" },
+      },
+      {
+        Header: "Gas Type",
+        accessor: "GAS_TYPE",
+        width: 100,
+        maxWidth: 100,
+        style: { whiteSpace: "unset" },
+      },
+      {
+        Header: "Tax Payer ID",
+        accessor: "Tax_Payer_ID",
+        width: 110,
+        maxWidth: 110,
+        style: { whiteSpace: "unset" },
+      },
 
-  const CellTitle = (tableProps) => {
-    const component = useMemo(
-      () => <p>{tableProps.row.original.Account_Title_and_explanation}</p>,
-      [tableProps]
-    );
-
-    return component;
-  };
-
-  const CellDebit = (tableProps, title) => {
-    const component = useMemo(
-      () => (
-        <p>
-          {title === "debit"
-            ? tableProps.row.original.Debit.toLocaleString()
-            : tableProps.row.original.Credit.toLocaleString()}
-        </p>
-      ),
-      [tableProps]
-    );
-
-    return component;
-  };
-
-  const COLUMNS = [
-    {
-      Header: "Date",
-      accessor: "date",
-      width: 94,
-      maxWidth: 94,
-      Cell: (tableProps) => CellDate(tableProps),
-    },
-    {
-      Header: "Account Title and explanation",
-      accessor: "Account_Title_and_explanation",
-      width: 164,
-      maxWidth: 164,
-      Cell: (tableProps) => CellTitle(tableProps),
-      style: { whiteSpace: "unset" },
-    },
-    {
-      Header: "Ref No",
-      accessor: "Ref_No",
-      width: 104,
-      maxWidth: 104,
-    },
-    {
-      Header: "Debit",
-      accessor: "Debit",
-      width: 104,
-      maxWidth: 104,
-      Cell: (tableProps) => CellDebit(tableProps, "debit"),
-    },
-    {
-      Header: "Credit",
-      accessor: "Credit",
-      width: 104,
-      maxWidth: 104,
-      Cell: (tableProps) => CellDebit(tableProps, "credit"),
-    },
-  ];
-  const columns = useMemo(() => COLUMNS, []);
+      {
+        Header: "Price per Litre",
+        accessor: "Price_per_Litre",
+        width: 110,
+        maxWidth: 110,
+        style: { whiteSpace: "unset" },
+      },
+      {
+        Header: "VAT 7%",
+        accessor: "VAT_7_Percent",
+        width: 110,
+        maxWidth: 110,
+        style: { whiteSpace: "unset" },
+      },
+      {
+        Header: "Total Price (Baht)",
+        accessor: "Total_Include_VAT",
+        width: 140,
+        maxWidth: 140,
+        style: { whiteSpace: "unset" },
+      },
+    ],
+    []
+  );
 
   const ourGlobalFilterFunction = useCallback(
     (rows, _, query) =>
@@ -149,7 +132,7 @@ export default function JournalTable({ oriData }) {
   } = useTable(
     {
       columns,
-      data: data,
+      data: tableData,
       defaultColumn,
       globalFilter: ourGlobalFilterFunction,
       initialState: {
@@ -201,7 +184,6 @@ export default function JournalTable({ oriData }) {
 
     if (value === "") {
       setGlobalFilter(value);
-      setSearchData([]);
     }
 
     setFilterInput(value);
@@ -232,7 +214,7 @@ export default function JournalTable({ oriData }) {
                 ref={searchInputRef}
                 onChange={handleFilterChange}
                 className="default-input min-w-[350px] smmx:min-w-[150px]"
-                placeholder="Ref no"
+                placeholder="Customer Id"
               />
             </div>
             <Button type="submit" className="mr-9">

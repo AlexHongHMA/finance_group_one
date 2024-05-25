@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState, useRef } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import {
   useTable,

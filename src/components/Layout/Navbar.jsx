@@ -1,7 +1,13 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 async function Navbar() {
+  const path = usePathname();
+
   const navbars = [
     {
       id: 0,
@@ -52,7 +58,10 @@ async function Navbar() {
               {navbars.map((item) => (
                 <Link
                   key={item.id}
-                  className="px-3 py-2 text-sm font-semibold bg-transparent rounded-lg md:ml-4 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline"
+                  className={cn(
+                    path === item.link ? "bg-gray-200" : "bg-transparent",
+                    "px-3 py-2 text-sm font-semibold rounded-lg md:ml-4 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline"
+                  )}
                   href={item.link}
                 >
                   {item.name}

@@ -1,9 +1,9 @@
+import IncomeTable from "@/components/IncomeStatement/IncomeTable";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import OrderRecord from "@/components/PurchasingOrder/OrderRecord";
 import React from "react";
 
 async function getData() {
-  const res = await fetch(`${process.env.APP_URL}/api/purchasing-order/`);
+  const res = await fetch(`${process.env.APP_URL}/api/income-statement/`);
 
   if (!res.ok) {
     console.log("Failed to fetch data");
@@ -12,13 +12,14 @@ async function getData() {
   return res.json();
 }
 
-const PurchasingOrder = async () => {
+const IncomeStatement = async () => {
   const stockData = await getData();
+
   return (
     <MaxWidthWrapper>
-      <OrderRecord oriData={stockData?.data?.recordset || []} />
+      <IncomeTable oriData={stockData?.data?.recordset || []} />
     </MaxWidthWrapper>
   );
 };
 
-export default PurchasingOrder;
+export default IncomeStatement;
