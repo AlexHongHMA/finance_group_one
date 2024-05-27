@@ -27,7 +27,7 @@ export default function OrderRecord({ oriData }) {
     []
   );
 
-  const [filters] = useState(["Customer_ID"]);
+  const [filters] = useState(["PO_No"]);
 
   const loading = { show: true, error: "" };
 
@@ -42,12 +42,18 @@ export default function OrderRecord({ oriData }) {
         maxWidth: 117,
         style: { whiteSpace: "unset" },
       },
-
       {
         Header: "Company",
         accessor: "Company",
         width: 140,
         maxWidth: 140,
+        style: { whiteSpace: "unset" },
+      },
+      {
+        Header: "Tax Payer ID",
+        accessor: "Tax_Payer_ID",
+        width: 110,
+        maxWidth: 110,
         style: { whiteSpace: "unset" },
       },
       {
@@ -187,24 +193,9 @@ export default function OrderRecord({ oriData }) {
     setFilterInput(value);
   };
 
-  async function fetchData() {
-    const res = await fetch(`${process.env.APP_URL}/api/purchasing-order/`);
-
-    if (!res.ok) {
-      console.log("Failed to fetch data");
-    }
-
-    const ran = await res.json();
-
-    console.log(ran, process.env.APP_URL);
-  }
-
   return (
     <>
       <div className="mb-8 flex smmx:flex-col justify-between items-end smmx:items-start smmx:space-y-5">
-        <button type="button" onClick={fetchData}>
-          Fetch
-        </button>
         <div>
           <form
             noValidate
@@ -227,7 +218,7 @@ export default function OrderRecord({ oriData }) {
                 ref={searchInputRef}
                 onChange={handleFilterChange}
                 className="default-input min-w-[350px] smmx:min-w-[150px]"
-                placeholder="Customer Id"
+                placeholder="Purchase Order"
               />
             </div>
             <Button type="submit" className="mr-9">

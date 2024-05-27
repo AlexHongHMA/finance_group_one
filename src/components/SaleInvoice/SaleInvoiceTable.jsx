@@ -19,7 +19,7 @@ export default function SaleInvoiceTable({ oriData }) {
   const [filterInput, setFilterInput] = useState("");
   const searchInputRef = useRef(null);
 
-  const [filters] = useState(["Customer_ID"]);
+  const [filters] = useState(["Invoice_No"]);
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -43,7 +43,13 @@ export default function SaleInvoiceTable({ oriData }) {
         maxWidth: 117,
         style: { whiteSpace: "unset" },
       },
-
+      {
+        Header: "Invoice No",
+        accessor: "Invoice_No",
+        width: 117,
+        maxWidth: 117,
+        style: { whiteSpace: "unset" },
+      },
       {
         Header: "Company",
         accessor: "COMPANY",
@@ -214,7 +220,7 @@ export default function SaleInvoiceTable({ oriData }) {
                 ref={searchInputRef}
                 onChange={handleFilterChange}
                 className="default-input min-w-[350px] smmx:min-w-[150px]"
-                placeholder="Customer Id"
+                placeholder="Invoice Number"
               />
             </div>
             <Button type="submit" className="mr-9">
@@ -227,3 +233,4 @@ export default function SaleInvoiceTable({ oriData }) {
     </>
   );
 }
+
